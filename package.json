@@ -1,8 +1,8 @@
 {
-    "name": "little-phil-monorepo-template",
+    "name": "zapper-monorepo",
     "version": "1.0.0",
     "private": true,
-    "description": "Monorepo template for Little Phil projects",
+    "description": "zapper monorepo project",
     "license": "ISC",
     "scripts": {
         "bootstrap": "npm install && npm run install:pkgs",
