@@ -5,7 +5,7 @@ const UsdcAbi = require("./ContractJson/Usdc.json");
 const BifiAbi = require("./ContractJson/Bifi.json");
 const SushiSwapLpAbi = require("./ContractJson/SushiSwapLPToken.json");
 
-describe("SwapperTest", function () {
+describe("Swapper", function () {
 
     const sushiSwapRouterV2 = "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506";
     let Swapper, swapper, wMatic, token1, token2, liquidityToken, user1, user2;
@@ -59,8 +59,19 @@ describe("SwapperTest", function () {
         );
 
         expect(await ethers.provider.getBalance(swapper.address)).to.equal(0);
+        expect(await token1.connect(user2).balanceOf(swapper.address)).to.equal(0);
+        expect(await token2.connect(user2).balanceOf(swapper.address)).to.equal(0);
+        expect(await liquidityToken.connect(user2).balanceOf(swapper.address)).to.equal("3918495231510");
+    });
+
+    it("User should be able to withdraw their money receive WMATIC", async ()=> {
+        await swapper.connect(user1).removeLiquidityAndSwap(
+            3918495231510
+        );
+
         expect(await token1.connect(user1).balanceOf(swapper.address)).to.equal(0);
         expect(await token2.connect(user1).balanceOf(swapper.address)).to.equal(0);
-        expect(await liquidityToken.connect(user1).balanceOf(swapper.address)).to.equal("3918495231510");
+        expect(await liquidityToken.connect(user1).balanceOf(swapper.address)).to.equal(0);
+        expect(await wMatic.connect(user1).balanceOf(user1.address)).to.equal("111682962402881693370");
     });
 });

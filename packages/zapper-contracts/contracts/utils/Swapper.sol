@@ -1,14 +1,14 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/IUniswapV2Router.sol";
 import "../interfaces/IUniswapV2Pair.sol";
 import "../interfaces/IUniswapV2Factory.sol";
 
-contract Swapper {
-    using SafeMath for uint;
+import "./MathSqrt.sol";
+
+contract Swapper is MathSqrt {
 
     address internal token1;
     address internal token2;
@@ -35,73 +35,133 @@ contract Swapper {
 
 //Public Functions
 
-    function addLiquidity() public payable{
+    function addLiquidityWithMatic() internal returns(uint _liquidity){
 
-        _swapEthForDai(_swapAmount(msg.value));
-        uint _amountTokenDesired = IERC20(token1).balanceOf(address(this));
-        uint _amountEthAdd = address(this).balance - 10;
-        IERC20(token1).approve(address(routerV2), _amountTokenDesired);
+        _swapMaticForToken(token1, msg.value);
 
-        routerV2.addLiquidityETH{value: _amountEthAdd}(
+        uint _amountOfToken1 = IERC20(token1).balanceOf(address(this));
+        uint _amountForSwap = _swapAmount(token1, token2, _amountOfToken1);
+
+        _swapTokenForToken(token1, token2, _amountForSwap);
+
+        uint _amountDesiredToken1 = IERC20(token1).balanceOf(address(this));
+        uint _amountDesiredToken2 = IERC20(token2).balanceOf(address(this));
+
+        IERC20(token1).approve(address(routerV2), _amountDesiredToken1);
+        IERC20(token2).approve(address(routerV2), _amountDesiredToken2);
+
+        (,, _liquidity) = routerV2.addLiquidity(
             token1,
-            _amountTokenDesired,
-            0,
-            0,
-            msg.sender,
+            token2,
+            _amountDesiredToken1,
+            _amountDesiredToken2,
+            1,
+            1,
+            address(this),
             block.timestamp
         );
 
-        uint refoundDai = IERC20(token1).balanceOf(address(this));
+        uint _refoundToken1 = IERC20(token1).balanceOf(address(this));
+        uint _refoundToken2 = IERC20(token2).balanceOf(address(this));
+
+
+        if(_refoundToken1 > 0){
+            IERC20(token1).transfer(msg.sender, _refoundToken1);
+        }
+
+        if(_refoundToken2 > 0){
+            IERC20(token2).transfer(msg.sender, _refoundToken2);
+        }
 
         if(address(this).balance > 0){
 
-            (bool success,) = msg.sender.call{ value: address(this).balance }("");
-            require(success, "refund failed");
-        }
-
-        if(refoundDai > 0){
-            IERC20(token1).transfer(msg.sender, refoundDai);
-        }
-
-    }
-
-//Utility Functions
-
-    function _sqrt(uint y) private pure returns (uint z) {
-        if (y > 3) {
-            z = y;
-            uint x = y / 2 + 1;
-            while (x < z) {
-                z = x;
-                x = (y / x + x) / 2;
-            }
-        }else if (y != 0) {
-            z = 1;
+            (bool _success,) = msg.sender.call{ value: address(this).balance }("");
+            require(_success, "Swapper: Refund failed");
         }
     }
 
-    function _getSwapAmount(uint r, uint a) private pure returns (uint) {
-        return (_sqrt(r.mul(r.mul(3988009) + a.mul(3988000))).sub(r.mul(1997))) / 1994;
-    }
+    function addLiquidityWithWmatic(uint _amount) internal returns(uint _liquidity){
 
-    function _swapAmount(uint _amount) private view returns(uint _swap){
+        IERC20(wMatic).transferFrom(msg.sender, address(this), _amount);
 
-        address pair = factoryV2.getPair(token2, token1);
-        (uint reserve0, uint reserve1, ) = IUniswapV2Pair(pair).getReserves();
+        _swapTokenForToken(wMatic, token1, _amount);
 
-        if (IUniswapV2Pair(pair).token0() == token2) {
-            _swap = _getSwapAmount(reserve0, _amount);
-        } else {
-            _swap = _getSwapAmount(reserve1, _amount);
+        uint _amountOfToken1 = IERC20(token1).balanceOf(address(this));
+        uint _amountForSwap = _swapAmount(token1, token2, _amountOfToken1);
+
+        _swapTokenForToken(token1, token2, _amountForSwap);
+
+        uint _amountDesiredToken1 = IERC20(token1).balanceOf(address(this));
+        uint _amountDesiredToken2 = IERC20(token2).balanceOf(address(this));
+
+        IERC20(token1).approve(address(routerV2), _amountDesiredToken1);
+        IERC20(token2).approve(address(routerV2), _amountDesiredToken2);
+
+        (,, _liquidity) = routerV2.addLiquidity(
+            token1,
+            token2,
+            _amountDesiredToken1,
+            _amountDesiredToken2,
+            1,
+            1,
+            address(this),
+            block.timestamp
+        );
+
+        uint _refoundToken1 = IERC20(token1).balanceOf(address(this));
+        uint _refoundToken2 = IERC20(token2).balanceOf(address(this));
+
+
+        if(_refoundToken1 > 0){
+            IERC20(token1).transfer(msg.sender, _refoundToken1);
+        }
+
+        if(_refoundToken2 > 0){
+            IERC20(token2).transfer(msg.sender, _refoundToken2);
+        }
+
+        if(address(this).balance > 0){
+
+            (bool _success,) = msg.sender.call{ value: address(this).balance }("");
+            require(_success, "Swapper: Refund failed");
         }
     }
 
-    function _swapEthForDai(uint _amount) private {
+    function removeLiquidityAndSwap(uint _amount) internal {
+
+        IERC20(_getPair(token1, token2)).approve(address(routerV2), _amount);
+
+        routerV2.removeLiquidity(
+            token1,
+            token2,
+            _amount,
+            1,
+            1,
+            address(this),
+            block.timestamp
+        );
+
+        uint _balanceOfToken1 = IERC20(token1).balanceOf(address(this));
+        uint _balanceOfToken2 = IERC20(token2).balanceOf(address(this));
+
+        _swapTokenForToken(token1, wMatic, _balanceOfToken1);
+        _swapTokenForToken(token2, wMatic, _balanceOfToken2);
+
+        uint _refoundBalance = IERC20(wMatic).balanceOf(address(this));
+
+        if(_refoundBalance > 0){
+            IERC20(wMatic).transfer(msg.sender, _refoundBalance);
+        }
+    }
+
+//Swapper Functions
+
+    function _swapMaticForToken(address _token, uint _amount) internal{
 
         address[] memory path = new address[](2);
         path = new address[](2);
-        path[0] = token2;
-        path[1] = token1;
+        path[0] = wMatic;
+        path[1] = _token;
 
         routerV2.swapExactETHForTokens {value : _amount}(
             1,
@@ -109,5 +169,43 @@ contract Swapper {
             address(this),
             block.timestamp
         );
+    }
+
+    function _swapTokenForToken(address _tokenA, address _tokenB, uint _amount) internal{
+
+        IERC20(_tokenA).approve(address(routerV2), _amount);
+
+        address[] memory path = new address[](2);
+        path = new address[](2);
+        path[0] = _tokenA;
+        path[1] = _tokenB;
+
+        routerV2.swapExactTokensForTokens(
+            _amount,
+            1,
+            path,
+            address(this),
+            block.timestamp
+        );
+    }
+
+//Utility Functions
+
+    function _swapAmount(address _tokenA, address _tokenB, uint _amount) private view returns(uint _swap){
+
+        address _pair = _getPair(_tokenA, _tokenB);
+        require(_pair != address(0), "Sapper: There is no token pair");
+
+        (uint reserve0, uint reserve1,) = IUniswapV2Pair(_pair).getReserves();
+
+        if (IUniswapV2Pair(_pair).token0() == _tokenA) {
+            _swap = _getSwapAmount(reserve0, _amount);
+        } else {
+            _swap = _getSwapAmount(reserve1, _amount);
+        }
+    }
+
+    function _getPair(address _tokenA, address _tokenB) private view returns(address){
+        return factoryV2.getPair(_tokenA, _tokenB);
     }
 }

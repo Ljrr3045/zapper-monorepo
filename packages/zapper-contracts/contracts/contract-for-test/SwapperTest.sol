@@ -127,6 +127,33 @@ contract SwapperTest is MathSqrt {
         }
     }
 
+    function removeLiquidityAndSwap(uint _amount) external {
+
+        IERC20(_getPair(token1, token2)).approve(address(routerV2), _amount);
+
+        routerV2.removeLiquidity(
+            token1,
+            token2,
+            _amount,
+            1,
+            1,
+            address(this),
+            block.timestamp
+        );
+
+        uint _balanceOfToken1 = IERC20(token1).balanceOf(address(this));
+        uint _balanceOfToken2 = IERC20(token2).balanceOf(address(this));
+
+        _swapTokenForToken(token1, wMatic, _balanceOfToken1);
+        _swapTokenForToken(token2, wMatic, _balanceOfToken2);
+
+        uint _refoundBalance = IERC20(wMatic).balanceOf(address(this));
+
+        if(_refoundBalance > 0){
+            IERC20(wMatic).transfer(msg.sender, _refoundBalance);
+        }
+    }
+
 //Swapper Functions
 
     function _swapMaticForToken(address _token, uint _amount) internal{
@@ -166,7 +193,7 @@ contract SwapperTest is MathSqrt {
 
     function _swapAmount(address _tokenA, address _tokenB, uint _amount) private view returns(uint _swap){
 
-        address _pair = factoryV2.getPair(_tokenA, _tokenB);
+        address _pair = _getPair(_tokenA, _tokenB);
         require(_pair != address(0), "Sapper: There is no token pair");
 
         (uint reserve0, uint reserve1,) = IUniswapV2Pair(_pair).getReserves();
@@ -176,5 +203,9 @@ contract SwapperTest is MathSqrt {
         } else {
             _swap = _getSwapAmount(reserve1, _amount);
         }
+    }
+
+    function _getPair(address _tokenA, address _tokenB) private view returns(address){
+        return factoryV2.getPair(_tokenA, _tokenB);
     }
 }
