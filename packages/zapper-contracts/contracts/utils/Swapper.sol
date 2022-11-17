@@ -35,7 +35,7 @@ contract Swapper is MathSqrt {
 
 //Public Functions
 
-    function addLiquidityWithMatic() internal returns(uint _liquidity){
+    function _addLiquidityWithMatic() internal returns(uint _liquidity){
 
         _swapMaticForToken(token1, msg.value);
 
@@ -80,7 +80,7 @@ contract Swapper is MathSqrt {
         }
     }
 
-    function addLiquidityWithWmatic(uint _amount) internal returns(uint _liquidity){
+    function _addLiquidityWithWmatic(uint _amount) internal returns(uint _liquidity){
 
         IERC20(wMatic).transferFrom(msg.sender, address(this), _amount);
 
@@ -127,7 +127,7 @@ contract Swapper is MathSqrt {
         }
     }
 
-    function removeLiquidityAndSwap(uint _amount) internal {
+    function _removeLiquidityAndSwap(uint _amount) internal{
 
         IERC20(_getPair(token1, token2)).approve(address(routerV2), _amount);
 
@@ -147,16 +147,26 @@ contract Swapper is MathSqrt {
         _swapTokenForToken(token1, wMatic, _balanceOfToken1);
         _swapTokenForToken(token2, wMatic, _balanceOfToken2);
 
-        uint _refoundBalance = IERC20(wMatic).balanceOf(address(this));
+        uint _refoundBalanceInWmatic = IERC20(wMatic).balanceOf(address(this));
+        uint _refoundBalanceInToken1 = IERC20(token1).balanceOf(address(this));
+        uint _refoundBalanceInToken2 = IERC20(token2).balanceOf(address(this));
 
-        if(_refoundBalance > 0){
-            IERC20(wMatic).transfer(msg.sender, _refoundBalance);
+        if(_refoundBalanceInWmatic > 0){
+            IERC20(wMatic).transfer(msg.sender, _refoundBalanceInWmatic);
+        }
+
+        if(_refoundBalanceInToken1 > 0){
+            IERC20(token1).transfer(msg.sender, _refoundBalanceInToken1);
+        }
+
+        if(_refoundBalanceInToken2 > 0){
+            IERC20(token2).transfer(msg.sender, _refoundBalanceInToken2);
         }
     }
 
 //Swapper Functions
 
-    function _swapMaticForToken(address _token, uint _amount) internal{
+    function _swapMaticForToken(address _token, uint _amount) private{
 
         address[] memory path = new address[](2);
         path = new address[](2);
@@ -171,7 +181,7 @@ contract Swapper is MathSqrt {
         );
     }
 
-    function _swapTokenForToken(address _tokenA, address _tokenB, uint _amount) internal{
+    function _swapTokenForToken(address _tokenA, address _tokenB, uint _amount) private{
 
         IERC20(_tokenA).approve(address(routerV2), _amount);
 
@@ -191,6 +201,10 @@ contract Swapper is MathSqrt {
 
 //Utility Functions
 
+    function _getPair(address _tokenA, address _tokenB) internal view returns(address){
+        return factoryV2.getPair(_tokenA, _tokenB);
+    }
+
     function _swapAmount(address _tokenA, address _tokenB, uint _amount) private view returns(uint _swap){
 
         address _pair = _getPair(_tokenA, _tokenB);
@@ -203,9 +217,5 @@ contract Swapper is MathSqrt {
         } else {
             _swap = _getSwapAmount(reserve1, _amount);
         }
-    }
-
-    function _getPair(address _tokenA, address _tokenB) private view returns(address){
-        return factoryV2.getPair(_tokenA, _tokenB);
     }
 }
