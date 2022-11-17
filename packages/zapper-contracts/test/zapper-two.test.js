@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const Erc20Abi = require("./ContractJson/Erc20.json");
 
-describe("Zapper USDC-BIFI", function () {
+describe("Zapper USDC-ETH", function () {
 
     const sushiSwapRouterV2 = "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506";
     let Zapper, zapper, vaultContract, wMatic, token1, token2, liquidityToken, user1, user2, user3, impersonalAccount;
@@ -16,11 +16,11 @@ describe("Zapper USDC-BIFI", function () {
         [user1, user2, user3] = await ethers.getSigners();
         impersonalAccount = await ethers.getSigner("0xfffbcd322ceace527c8ec6da8de2461c6d9d4e6e"); //user with WMatic
 
-        vaultContract = await new ethers.Contract( "0x03F69AAF4c8512f533Da46cC9eFd49C4969e3CB8" , Erc20Abi );
+        vaultContract = await new ethers.Contract( "0xE4DB97A2AAFbfef40D1a4AE8B709f61d6756F8e1" , Erc20Abi );
         wMatic = await new ethers.Contract( "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270" , Erc20Abi );
         token1 = await new ethers.Contract( "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174" , Erc20Abi ); //USDC
-        token2 = await new ethers.Contract( "0xFbdd194376de19a88118e84E279b977f165d01b8" , Erc20Abi ); //BIFI
-        liquidityToken = await new ethers.Contract( "0x180237bd326d5245D0898336F54b3c8012c5c62f" , Erc20Abi );
+        token2 = await new ethers.Contract( "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619" , Erc20Abi ); //WETH
+        liquidityToken = await new ethers.Contract( "0x34965ba0ac2451A34a0471F04CCa3F990b8dea27" , Erc20Abi );
 
         Zapper = await ethers.getContractFactory("Zapper");
         zapper = await Zapper.deploy(
@@ -48,7 +48,7 @@ describe("Zapper USDC-BIFI", function () {
             let _userBalanceAfter = await ethers.provider.getBalance(user1.address);
 
             expect(_userBalanceBefore).to.be.above(_userBalanceAfter);
-            expect(await zapper.connect(user1).userBalance(user1.address)).to.equal("1640574174156");
+            expect(await zapper.connect(user1).userBalance(user1.address)).to.equal("799373024608");
         });
 
         it("Zapper should not keep funds", async ()=> {
@@ -61,13 +61,13 @@ describe("Zapper USDC-BIFI", function () {
 
         it("Zapper should return the surplus to the user", async ()=> {
 
-            expect(await token1.connect(user1).balanceOf(user1.address)).to.equal(1);
+            expect(await token1.connect(user1).balanceOf(user1.address)).to.equal(2);
             expect(await token2.connect(user1).balanceOf(user1.address)).to.equal(0);
         });
 
         it("Zapper should invest in the Vault", async ()=> {
 
-            expect(await vaultContract.connect(user1).balanceOf(zapper.address)).to.equal("1640574174156");
+            expect(await vaultContract.connect(user1).balanceOf(zapper.address)).to.equal("799373024608");
         });
     });
 
@@ -88,7 +88,7 @@ describe("Zapper USDC-BIFI", function () {
             let _userBalanceAfter = await wMatic.connect(user2).balanceOf(user2.address);
 
             expect(_userBalanceBefore).to.be.above(_userBalanceAfter);
-            expect(await zapper.connect(user2).userBalance(user2.address)).to.equal("1637444885773");
+            expect(await zapper.connect(user2).userBalance(user2.address)).to.equal("798751871473");
         });
 
         it("Zapper should not keep funds", async ()=> {
@@ -101,13 +101,13 @@ describe("Zapper USDC-BIFI", function () {
 
         it("Zapper should return the surplus to the user", async ()=> {
 
-            expect(await token1.connect(user2).balanceOf(user2.address)).to.equal(2);
+            expect(await token1.connect(user2).balanceOf(user2.address)).to.equal(3);
             expect(await token2.connect(user2).balanceOf(user2.address)).to.equal(0);
         });
 
         it("Zapper should invest in the Vault", async ()=> {
 
-            expect(await vaultContract.connect(user1).balanceOf(zapper.address)).to.equal("3278019059929");
+            expect(await vaultContract.connect(user1).balanceOf(zapper.address)).to.equal("1598124896081");
         });
     });
 
@@ -122,22 +122,22 @@ describe("Zapper USDC-BIFI", function () {
 
         it("User 1 should be able to withdraw", async ()=> {
 
-            expect(await wMatic.connect(user1).balanceOf(user1.address)).to.equal(0);
+            expect(await wMatic.connect(user1).balanceOf(user1.address)).to.equal("60591825912360339313");
             await zapper.connect(user1).withdraw();
 
-            expect(await wMatic.connect(user1).balanceOf(user1.address)).to.equal("60591825912360339313");
+            expect(await wMatic.connect(user1).balanceOf(user1.address)).to.equal("159607744738093063167");
         });
 
         it("Zapper should have removed user 1 balance from the Vault", async ()=> {
-            expect(await vaultContract.connect(user1).balanceOf(zapper.address)).to.equal("1637444885773");
+            expect(await vaultContract.connect(user1).balanceOf(zapper.address)).to.equal("798751871473");
         });
 
         it("User 2 should be able to withdraw", async ()=> {
 
-            expect(await wMatic.connect(user2).balanceOf(user2.address)).to.equal(ethers.utils.parseEther("900"));
+            expect(await wMatic.connect(user2).balanceOf(user2.address)).to.equal("1850988396755673177098");
             await zapper.connect(user2).withdraw();
 
-            expect(await wMatic.connect(user2).balanceOf(user2.address)).to.equal("950988396755673177098");
+            expect(await wMatic.connect(user2).balanceOf(user2.address)).to.equal("1949907167304866535122");
         });
 
         it("Zapper should have removed user 2 balance from the Vault", async ()=> {
@@ -155,10 +155,10 @@ describe("Zapper USDC-BIFI", function () {
 
         it("Zapper should return the surplus to the user", async ()=> {
 
-            expect(await token1.connect(user1).balanceOf(user1.address)).to.equal(1);
+            expect(await token1.connect(user1).balanceOf(user1.address)).to.equal(2);
             expect(await token2.connect(user1).balanceOf(user1.address)).to.equal(0);
 
-            expect(await token1.connect(user2).balanceOf(user2.address)).to.equal(2);
+            expect(await token1.connect(user2).balanceOf(user2.address)).to.equal(3);
             expect(await token2.connect(user2).balanceOf(user2.address)).to.equal(0);
         });
     });

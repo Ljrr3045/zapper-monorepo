@@ -15,14 +15,15 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 });
 
 module.exports = {
-  solidity: {
-    compilers: [{
-      version: "0.7.8"
-    },
-    {
-      version: "0.8.8"
-    }]
-  },
+	solidity: {
+		version: "0.8.8",
+		settings: {
+			optimizer: {
+			enabled: true,
+			runs: 200,
+			},
+		},
+	},
   networks: {
     hardhat: {
       forking: {
