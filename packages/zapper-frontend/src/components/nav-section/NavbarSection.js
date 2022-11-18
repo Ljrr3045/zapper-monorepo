@@ -5,6 +5,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import WalletButton from "./WalletButton";
 
 function NavbarSection() {
+
   return (
     <Navbar bg="light" variant="light">
       <Container>

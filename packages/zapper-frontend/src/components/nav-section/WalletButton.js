@@ -1,32 +1,10 @@
 import "./WalletButton.css";
-import React, { useState } from 'react';
+import React from 'react';
+import { useApp } from "../../contexts/AppContext";
 
 function WalletButton() {
-    const [isConnected, setIsConnected] = useState(false);
-    const [walletAddress, setWalletAddress] = useState("");
-    const [buttonText, setButtonText] = useState("Connect Wallet");
 
-    const connectWallet = async () => {
-
-        const { ethereum } = window;
-
-        if(!isConnected){
-
-            try {
-
-                const accounts = await ethereum.request({
-                    method: 'eth_requestAccounts',
-                });
-
-                setWalletAddress(accounts[0]);
-                setButtonText(`${accounts[0].slice(0, 4)}...${accounts[0].slice(-4)}`);
-
-                setIsConnected(true);
-            } catch (error) {
-                setIsConnected(false);
-            }
-        }
-    };
+    const {buttonText, connectWallet} = useApp();
 
     return (
         <>

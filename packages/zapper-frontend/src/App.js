@@ -1,12 +1,13 @@
-import './App.css';
 import React from 'react';
+import { AppProvider } from "./contexts/AppContext";
 import NavbarSection from './components/nav-section/NavbarSection';
 
-function App() {
+function App(){
+
   return (
-    <>
+    <AppProvider>
       <NavbarSection/>
-    </>
+    </AppProvider>
   );
 }
 
