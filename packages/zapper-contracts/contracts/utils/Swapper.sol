@@ -1,11 +1,17 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+/**
+    @title Swapper Contract
+    @author ljrr3045
+    @notice Contract that contains all the necessary functions to interact with UniswapV2 (or its forks).
+    In the contract there are functions to swap tokens, add liquidity, etc.
+*/
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/IUniswapV2Router.sol";
 import "../interfaces/IUniswapV2Pair.sol";
 import "../interfaces/IUniswapV2Factory.sol";
-
 import "./MathSqrt.sol";
 
 contract Swapper is MathSqrt {
@@ -18,6 +24,12 @@ contract Swapper is MathSqrt {
 
 //Constructor
 
+    /**
+        @param _wMatic WMATIC address in the network used
+        @param _token1 Address of the first token to use in the token pair
+        @param _token2 Address of the second token to use in the token pair
+        @param _routerV2 Uniswap Router V2 address (or its forks)
+    */
     constructor(
         address _wMatic,
         address _token1,
@@ -33,8 +45,14 @@ contract Swapper is MathSqrt {
         factoryV2 = IUniswapV2Factory(routerV2.factory());
     }
 
-//Public Functions
+//Liquidity Functions
 
+    /**
+        @notice Function to add liquidity to the pool, using MATIC.
+        @dev This function swaps MATIC to Token1 and then calculates the optimal amount to swap from token1 to token2,
+        finally adds liquidity to the pool.
+        @dev Returns the amount of LP Token that was obtained in the operation.
+    */
     function _addLiquidityWithMatic() internal returns(uint _liquidity){
 
         _swapMaticForToken(token1, msg.value);
@@ -80,6 +98,12 @@ contract Swapper is MathSqrt {
         }
     }
 
+    /**
+        @notice Function to add liquidity to the pool, using WMATIC.
+        @dev This function swaps WMATIC to Token1 and then calculates the optimal amount to swap from token1 to token2,
+        finally adds liquidity to the pool.
+        @dev Returns the amount of LP Token that was obtained in the operation.
+    */
     function _addLiquidityWithWmatic(uint _amount) internal returns(uint _liquidity){
 
         IERC20(wMatic).transferFrom(msg.sender, address(this), _amount);
@@ -127,6 +151,10 @@ contract Swapper is MathSqrt {
         }
     }
 
+    /**
+        @notice This function changes and removes funds from the pool (LP Token).
+        @dev This function changes and returns all the money to the user in WMATIC.
+    */
     function _removeLiquidityAndSwap(uint _amount) internal{
 
         IERC20(_getPair(token1, token2)).approve(address(routerV2), _amount);
@@ -166,6 +194,7 @@ contract Swapper is MathSqrt {
 
 //Swapper Functions
 
+    ///@dev Function to swap exactly MATIC for Token
     function _swapMaticForToken(address _token, uint _amount) private{
 
         address[] memory path = new address[](2);
@@ -181,6 +210,7 @@ contract Swapper is MathSqrt {
         );
     }
 
+    ///@dev Function to swap exactly Token for Token
     function _swapTokenForToken(address _tokenA, address _tokenB, uint _amount) private{
 
         IERC20(_tokenA).approve(address(routerV2), _amount);
@@ -201,10 +231,12 @@ contract Swapper is MathSqrt {
 
 //Utility Functions
 
+    ///@dev Returns the address of the LP Token contract of the token pair.
     function _getPair(address _tokenA, address _tokenB) internal view returns(address){
         return factoryV2.getPair(_tokenA, _tokenB);
     }
 
+    ///@dev Returns the total amount to be swapped of TokenA to add liquidity in an equivalent way in the pool.
     function _swapAmount(address _tokenA, address _tokenB, uint _amount) private view returns(uint _swap){
 
         address _pair = _getPair(_tokenA, _tokenB);

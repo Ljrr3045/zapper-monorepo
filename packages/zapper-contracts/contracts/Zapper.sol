@@ -1,6 +1,12 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+/**
+    @title Zapper Contract
+    @author ljrr3045
+    @notice Contract created to invest in Beefy Finance Vaults, all in a single transaction from MATIC or WMATIC.
+*/
+
 import "./interfaces/IBeefy.sol";
 import "./utils/Swapper.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -17,10 +23,15 @@ contract Zapper is Swapper {
 
 //Mappins
 
+    ///@dev Stores the amount of Vault Token that the user has deposited.
     mapping (address => uint) public userBalance;
 
 //Modifiers
 
+    /**
+        @dev Verify if the user approved the contract to use an amount greater than or equal to the amount
+        he wishes to invest in WMATIC
+    */
     modifier checkToDepositWithWmatic(uint _amount) {
         uint _allowedBalance = IERC20(wMatic).allowance(msg.sender, address(this));
         require(
@@ -30,6 +41,9 @@ contract Zapper is Swapper {
         _;
     }
 
+    /**
+        @dev Check if the user has previously invested from the contract and check if they have funds to withdraw
+    */
     modifier checkToWithdraw(){
         require(
             userBalance[msg.sender] > 0,
@@ -38,6 +52,15 @@ contract Zapper is Swapper {
         _;
     }
 
+//Constructor
+
+    /**
+        @param _vaultContract Address of the Beefy Finance Vault to be used
+        @param _wMatic WMATIC address in the network used
+        @param _token1 Address of the first token to use in the token pair
+        @param _token2 Address of the second token to use in the token pair
+        @param _routerV2 Uniswap Router V2 address (or its forks)
+    */
     constructor(
         address _vaultContract,
         address _wMatic,
@@ -60,6 +83,7 @@ contract Zapper is Swapper {
         );
     }
 
+    ///@notice Function to invest in the Vault using MATIC
     function depositWithMatic() public payable{
 
         uint _liquidityAdded = _addLiquidityWithMatic();
@@ -77,6 +101,7 @@ contract Zapper is Swapper {
         emit userDeposit(msg.sender, _totalBalanceAddedForUser, block.timestamp);
     }
 
+    ///@notice Function to invest in the Vault using WMATIC
     function depositWithWMatic(uint _amount) public checkToDepositWithWmatic(_amount){
 
         uint _liquidityAdded = _addLiquidityWithWmatic(_amount);
@@ -94,6 +119,7 @@ contract Zapper is Swapper {
         emit userDeposit(msg.sender, _totalBalanceAddedForUser, block.timestamp);
     }
 
+    ///@notice Function to withdraw the user's funds from the Vault and return the money in WMATIC.
     function withdraw() public checkToWithdraw{
 
         uint _balanceToWithdraw = userBalance[msg.sender];
