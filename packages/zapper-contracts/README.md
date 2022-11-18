@@ -32,3 +32,20 @@ npm run contract:deploy
 npx hardhat docgen
 ```
 
+## Connect with Hardhat Fork
+
+To connect to the Hardhat Fork on the LocalHost, you must follow the steps below:
+```
+# Start the LocalHost
+npx hardhat node --network hardhat
+
+# Deploy smart contracts
+npm run contract:deploy
+```
+Once this is done, you will need to configure the LocalHost network in your Metamask with the address: http://127.0.0.1:8545/
+
+You must also add one of the accounts provided by Hardhat to your metamask in order to have a balance and be able to interact with the Dapp.
+```
+# Add the private key of one of the addresses in your metamask
+Private Key: <PRIVATE KEY>
+```
