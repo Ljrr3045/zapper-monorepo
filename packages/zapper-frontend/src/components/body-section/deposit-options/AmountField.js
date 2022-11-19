@@ -17,6 +17,7 @@ function AmountField() {
                 type="number"
                 placeholder="Amount"
                 aria-label="Amount"
+                min={1}
                 onChange={handleChange}
             />
         </div>

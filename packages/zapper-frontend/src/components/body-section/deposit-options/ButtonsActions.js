@@ -4,16 +4,27 @@ import { useApp } from "../../../contexts/AppContext";
 
 function ButtonsActions() {
 
-    const { currency } = useApp();
+    const {
+        currency,
+        depositWithMatic,
+        approveWmatic,
+        depositWithWmatic,
+        depositAmount,
+        approveAmount
+    } = useApp();
 
     const wMaticSteps = [
         {
             id: 0,
-            step: "Approve"
+            step: "Approve",
+            action: approveWmatic,
+            disabled: !(depositAmount > 0)
         },
         {
-            id: 0,
-            step: "Deposit"
+            id: 1,
+            step: "Deposit",
+            action: depositWithWmatic,
+            disabled: !(approveAmount > 0 && depositAmount > 0 && approveAmount >= depositAmount)
         }
     ]
 
@@ -23,6 +34,8 @@ function ButtonsActions() {
                 <button
                     className="btn btn-primary ButtonsActions-size-matic"
                     type="button"
+                    onClick={depositWithMatic}
+                    disabled={!(depositAmount > 0)}
                 >
                     Deposit
                 </button>
@@ -39,6 +52,8 @@ function ButtonsActions() {
                             key={step.id}
                             type="button"
                             className="btn btn-primary ButtonsActions-size-wmatic"
+                            onClick={step.action}
+                            disabled={step.disabled}
                         >
                             {step.step}
                         </button>

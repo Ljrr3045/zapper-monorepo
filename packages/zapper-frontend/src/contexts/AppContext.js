@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { ethers } from "ethers";
+import wMaticABI from "../contractsAbi/Erc20.json";
+import zapperABI from "../contractsAbi/Zapper.json";
 
 /**
  * TODO
@@ -15,6 +17,9 @@ export const AppContext = createContext({});
 */
 export const AppProvider = ({ children }) => {
 
+    const wMaticAddress = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
+    const zapperAddress = "0x293f3170955446BF49F07af90538fb5439A6a881";
+
 //UseState
 
     //Wallet options
@@ -27,6 +32,7 @@ export const AppProvider = ({ children }) => {
 
     //Deposit options
     const [currency, setCurrency] = useState(0);
+    const [approveAmount, setApproveAmount] = useState(0);
     const [depositAmount, setDepositAmount] = useState(0);
 
     //Withdraw options
@@ -40,18 +46,113 @@ export const AppProvider = ({ children }) => {
 
             try {
 
-                const provider = new ethers.providers.Web3Provider(window.ethereum)
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const accounts = await provider.send("eth_requestAccounts", []);
 
                 setWalletAddress(accounts[0]);
                 setButtonText(`${accounts[0].slice(0, 4)}...${accounts[0].slice(-4)}`);
 
+                getVaultUserBalance(accounts[0]);
+
                 setIsConnected(true);
             } catch (error) {
+
+                alert("An error occurred connecting Metamask");
                 setIsConnected(false);
             }
         }
     };
+
+    const getVaultUserBalance = async (_walletAddress) => {
+
+        try {
+
+            const provider = new ethers.providers.Web3Provider(window.ethereum)
+            const signer = provider.getSigner();
+
+            const zapper = new ethers.Contract(zapperAddress, zapperABI, signer);
+
+            let _userBalance = await zapper.userBalance(_walletAddress);
+
+            if(_userBalance > 0){
+                setAmountToWithdraw(ethers.utils.formatEther(_userBalance));
+            }
+        } catch (error) {
+
+            console.log("Error when get vault user balance: ", error);
+        }
+    }
+
+    const depositWithMatic = async () => {
+
+        try {
+
+            const provider = new ethers.providers.Web3Provider(window.ethereum)
+            const signer = provider.getSigner();
+
+            const zapper = new ethers.Contract(zapperAddress, zapperABI, signer);
+            await zapper.depositWithMatic({value: ethers.utils.parseEther(String(depositAmount))});
+
+        } catch (error) {
+
+            console.log("Error when depositing with MATIC: ", error);
+        }
+    }
+
+    const approveWmatic = async () => {
+
+        try {
+
+            const provider = new ethers.providers.Web3Provider(window.ethereum)
+            const signer = provider.getSigner();
+
+            const wMatic = new ethers.Contract(wMaticAddress, wMaticABI, signer);
+            await wMatic.approve(zapperAddress, ethers.utils.parseEther(String(depositAmount)));
+
+            setApproveAmount(depositAmount);
+
+        } catch (error) {
+
+            console.log("Error when approve with MATIC: ", error);
+        }
+    }
+
+    const depositWithWmatic = async () => {
+
+        try {
+
+            const provider = new ethers.providers.Web3Provider(window.ethereum)
+            const signer = provider.getSigner();
+
+            const zapper = new ethers.Contract(zapperAddress, zapperABI, signer);
+            await zapper.depositWithWMatic(ethers.utils.parseEther(String(depositAmount)));
+
+            setApproveAmount(approveAmount - depositAmount);
+
+        } catch (error) {
+
+            console.log("Error when depositing with WMATIC: ", error);
+        }
+    }
+
+    const WithdrawBalance = async () => {
+
+        try {
+
+            if(amountToWithdraw !== 0){
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum)
+                const signer = provider.getSigner();
+
+                const zapper = new ethers.Contract(zapperAddress, zapperABI, signer);
+
+                await zapper.withdraw();
+            }
+        } catch (error) {
+
+            console.log("Error when withdraw balance: ", error);
+        }
+    }
 
 // Return component
   return (
@@ -68,7 +169,12 @@ export const AppProvider = ({ children }) => {
         depositAmount,
         setDepositAmount,
         amountToWithdraw,
-        setAmountToWithdraw
+        setAmountToWithdraw,
+        depositWithMatic,
+        approveWmatic,
+        depositWithWmatic,
+        WithdrawBalance
+
       }}
     >
       {children}

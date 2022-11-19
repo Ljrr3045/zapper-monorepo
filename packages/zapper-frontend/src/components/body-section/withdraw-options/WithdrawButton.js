@@ -1,13 +1,18 @@
 import "./WithdrawButton.css";
 import React from 'react';
+import { useApp } from "../../../contexts/AppContext";
 
 function WithdrawButton() {
+
+    const { WithdrawBalance, amountToWithdraw } = useApp();
 
     return (
         <div className="row WithdrawButton-position">
             <button
                 className="btn btn-primary WithdrawButton-size-matic"
                 type="button"
+                onClick={WithdrawBalance}
+                disabled={amountToWithdraw === 0}
             >
                 Withdraw All
             </button>

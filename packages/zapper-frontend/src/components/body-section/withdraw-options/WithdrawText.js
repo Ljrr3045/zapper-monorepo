@@ -12,7 +12,10 @@ function WithdrawText() {
             <b>Your total balance to withdraw from Beefy Finance is</b>
         </div>
         <div className="WithdrawText-value">
-            {`${amountToWithdraw} Vault Token`}
+            {`${amountToWithdraw}`}
+        </div>
+        <div className="WithdrawText-token">
+            Vault Token
         </div>
     </div>
   )
