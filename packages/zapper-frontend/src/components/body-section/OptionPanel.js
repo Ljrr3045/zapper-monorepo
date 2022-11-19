@@ -1,28 +1,25 @@
 import "./OptionPanel.css";
 import React from 'react';
-import Card from 'react-bootstrap/Card';
-import SwitchButtons from "./SwitchButtons";
-import DepositOptions from "./deposit-options/DepositOptions";
-import WithdrawOptions from "./withdraw-options/WithdrawOptions";
+import WalletConnected from "./WalletConnected";
+import WithoutWallet from "./WithoutWallet";
 import { useApp } from "../../contexts/AppContext";
 
 function OptionPanel() {
 
-    const { userAction } = useApp();
+    const { isConnected } = useApp();
 
     return (
         <div className="container text-center Panel-size">
             <div className="row align-items-center">
-                <Card>
-                    <Card.Body>
-                        <SwitchButtons/>
-                        {
-                            userAction === 0 ?
-                                <DepositOptions/> :
-                                <WithdrawOptions/>
-                        }
-                    </Card.Body>
-                </Card>
+                {
+                    isConnected ?
+                    <div className="effect-WalletConnected">
+                        <WalletConnected/>
+                    </div> :
+                    <div className="effect-WithoutWallet">
+                        <WithoutWallet/>
+                    </div>
+                }
             </div>
         </div>
     )

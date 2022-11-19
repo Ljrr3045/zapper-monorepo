@@ -169,6 +169,7 @@ export const AppProvider = ({ children }) => {
         depositAmount,
         setDepositAmount,
         amountToWithdraw,
+        approveAmount,
         setAmountToWithdraw,
         depositWithMatic,
         approveWmatic,
