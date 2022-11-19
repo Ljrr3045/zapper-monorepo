@@ -29,6 +29,9 @@ export const AppProvider = ({ children }) => {
     const [currency, setCurrency] = useState(0);
     const [depositAmount, setDepositAmount] = useState(0);
 
+    //Withdraw options
+    const [amountToWithdraw, setAmountToWithdraw] = useState(0);
+
 //Utility Functions
 
     const connectWallet = async () => {
@@ -63,7 +66,9 @@ export const AppProvider = ({ children }) => {
         currency,
         setCurrency,
         depositAmount,
-        setDepositAmount
+        setDepositAmount,
+        amountToWithdraw,
+        setAmountToWithdraw
       }}
     >
       {children}
