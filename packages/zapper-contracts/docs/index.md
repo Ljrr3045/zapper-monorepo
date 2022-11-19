@@ -24,10 +24,10 @@ event userDeposit(address _user, uint256 _amount, uint256 _date)
 event userWithdraw(address _user, uint256 _amount, uint256 _date)
 ```
 
-### userBalance
+### _userBalance
 
 ```solidity
-mapping(address => uint256) userBalance
+mapping(address => uint256) _userBalance
 ```
 
 _Stores the amount of Vault Token that the user has deposited._
@@ -59,16 +59,24 @@ constructor(address _vaultContract, address _wMatic, address _token1, address _t
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| _vaultContract | Address | Address of the Beefy Finance Vault to be used |
+| _vaultContract | address | Address of the Beefy Finance Vault to be used |
 | _wMatic | address | WMATIC address in the network used |
 | _token1 | address | Address of the first token to use in the token pair |
 | _token2 | address | Address of the second token to use in the token pair |
 | _routerV2 | address | Uniswap Router V2 address (or its forks) |
 
+### userBalance
+
+```solidity
+function userBalance(address _user) external view returns (uint256)
+```
+
+_Returns the balance that the user has invested in the Vault._
+
 ### depositWithMatic
 
 ```solidity
-function depositWithMatic() public payable
+function depositWithMatic() external payable
 ```
 
 Function to invest in the Vault using MATIC
@@ -76,7 +84,7 @@ Function to invest in the Vault using MATIC
 ### depositWithWMatic
 
 ```solidity
-function depositWithWMatic(uint256 _amount) public
+function depositWithWMatic(uint256 _amount) external
 ```
 
 Function to invest in the Vault using WMATIC
@@ -84,7 +92,7 @@ Function to invest in the Vault using WMATIC
 ### withdraw
 
 ```solidity
-function withdraw() public
+function withdraw() external
 ```
 
 Function to withdraw the user's funds from the Vault and return the money in WMATIC.
@@ -147,7 +155,7 @@ function withdraw(uint256 _shares) external
 function getPair(address token0, address token1) external view returns (address)
 ```
 
-## IUniswapV2Pair
+# IUniswapV2Pair
 
 ### token0
 
@@ -292,7 +300,7 @@ constructor(address _wMatic, address _token1, address _token2, address _routerV2
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | _wMatic | address | WMATIC address in the network used |
-| _token1 | address | Address of the first token to use in the token pair |
+| _token1 | address | Address of the first token to use in the token |
 | _token2 | address | Address of the second token to use in the token pair |
 | _routerV2 | address | Uniswap Router V2 address (or its forks) |
 

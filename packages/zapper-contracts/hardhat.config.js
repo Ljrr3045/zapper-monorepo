@@ -31,6 +31,12 @@ module.exports = {
         blockNumber: 35609317,
       }
     },
+    polygon: {
+        url: process.env.POLYGON_MAINNET_URL,
+        accounts:{
+          mnemonic: process.env.MNEMONIC
+        },
+    },
     mumbai: {
       url: process.env.MUMBAI_URL,
       accounts:{
@@ -40,8 +46,8 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      polygonMainnet: process.env.POLYGONSCAN_API_KEY,
-      mumbai: process.env.POLYGONSCAN_API_KEY
+      polygon: process.env.POLYGONSCAN_API_KEY,
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY
     }
   },
   gasReporter: {

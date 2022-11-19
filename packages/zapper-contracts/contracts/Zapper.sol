@@ -24,7 +24,7 @@ contract Zapper is Swapper {
 //Mappins
 
     ///@dev Stores the amount of Vault Token that the user has deposited.
-    mapping (address => uint) public userBalance;
+    mapping (address => uint) internal _userBalance;
 
 //Modifiers
 
@@ -46,7 +46,7 @@ contract Zapper is Swapper {
     */
     modifier checkToWithdraw(){
         require(
-            userBalance[msg.sender] > 0,
+            _userBalance[msg.sender] > 0,
             "Zapper: User has no funds to withdraw"
         );
         _;
@@ -83,8 +83,17 @@ contract Zapper is Swapper {
         );
     }
 
+//View Functions
+
+    ///@dev Returns the balance that the user has invested in the Vault.
+    function userBalance(address _user) external view returns(uint){
+        return _userBalance[_user];
+    }
+
+//Use Functions
+
     ///@notice Function to invest in the Vault using MATIC
-    function depositWithMatic() public payable{
+    function depositWithMatic() external payable{
 
         uint _liquidityAdded = _addLiquidityWithMatic();
 
@@ -96,13 +105,13 @@ contract Zapper is Swapper {
         uint _balanceAfterDeposit = vaultContract.balanceOf(address(this));
 
         uint _totalBalanceAddedForUser = _balanceAfterDeposit - _balanceBeforeDeposit;
-        userBalance[msg.sender] += _totalBalanceAddedForUser;
+        _userBalance[msg.sender] += _totalBalanceAddedForUser;
 
         emit userDeposit(msg.sender, _totalBalanceAddedForUser, block.timestamp);
     }
 
     ///@notice Function to invest in the Vault using WMATIC
-    function depositWithWMatic(uint _amount) public checkToDepositWithWmatic(_amount){
+    function depositWithWMatic(uint _amount) external checkToDepositWithWmatic(_amount){
 
         uint _liquidityAdded = _addLiquidityWithWmatic(_amount);
 
@@ -114,16 +123,16 @@ contract Zapper is Swapper {
         uint _balanceAfterDeposit = vaultContract.balanceOf(address(this));
 
         uint _totalBalanceAddedForUser = _balanceAfterDeposit - _balanceBeforeDeposit;
-        userBalance[msg.sender] += _totalBalanceAddedForUser;
+        _userBalance[msg.sender] += _totalBalanceAddedForUser;
 
         emit userDeposit(msg.sender, _totalBalanceAddedForUser, block.timestamp);
     }
 
     ///@notice Function to withdraw the user's funds from the Vault and return the money in WMATIC.
-    function withdraw() public checkToWithdraw{
+    function withdraw() external checkToWithdraw{
 
-        uint _balanceToWithdraw = userBalance[msg.sender];
-        userBalance[msg.sender] = 0;
+        uint _balanceToWithdraw = _userBalance[msg.sender];
+        _userBalance[msg.sender] = 0;
 
         vaultContract.withdraw(_balanceToWithdraw);
         uint _balanceForUser = liquidityToken.balanceOf(address(this));
