@@ -25,6 +25,9 @@ npx hardhat compile
 # Run tests
 npx hardhat test (or npx hardhat coverage)
 
+# Run local node
+npm run run:node
+
 # Run deploy script
 npm run contract:deploy
 
@@ -37,7 +40,7 @@ npx hardhat docgen
 To connect to the Hardhat Fork on the LocalHost, you must follow the steps below:
 ```
 # Start the LocalHost
-npx hardhat node --network hardhat
+npm run run:node
 
 # Deploy smart contracts
 npm run contract:deploy

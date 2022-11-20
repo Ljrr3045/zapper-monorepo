@@ -4,6 +4,14 @@ This Monorepo contains everything related to the Zapper Dapp project.
 
 This project consists of a Dapp which will invest in Beefy Finance Vaults. In this Monorepo you can find the "zapper-contracts" folder which contains all the development of Smart Contracts and the "zapper-frontend" folder which contains all the Dapp Frontend
 
+- Project Links:
+* [Dapp on Netlify](https://zapper-dapp-by-ljrr3045.netlify.app/)
+* [Smart contracts in polygon](https://polygonscan.com/address/0x293f3170955446bf49f07af90538fb5439a6a881#code)
+
+- Notes:
+
+This project makes use of the Beefy Finance Vault https://app.beefy.finance/vault/sushi-poly-usdc-eth
+
 ## Getting started
 
 The first step is to clone this repository:
@@ -24,6 +32,8 @@ npm run bootstrap
 This will install all packages in the monorepo as well as all the packages.
 
 ## Smart contracts
+
+- Address on Polygon: 0x293f3170955446BF49F07af90538fb5439A6a881
 
 ### Technologies and protocols used
 
@@ -47,6 +57,9 @@ npx hardhat compile
 
 # Run tests
 npx hardhat test (or npx hardhat coverage)
+
+# Run local node
+npm run run:node
 
 # Run deploy script
 npm run contract:deploy
