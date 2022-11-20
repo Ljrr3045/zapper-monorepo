@@ -17,6 +17,7 @@ export const AppContext = createContext({});
 */
 export const AppProvider = ({ children }) => {
 
+    /**@dev Addresses of the contracts to use, in the polygon network */
     const wMaticAddress = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
     const zapperAddress = "0x293f3170955446BF49F07af90538fb5439A6a881";
 
@@ -40,6 +41,7 @@ export const AppProvider = ({ children }) => {
 
 //Utility Functions
 
+    /**@notice This function allows establishing communication with the RPC provider of the browser (Metamask) */
     const connectWallet = async () => {
 
         if(!isConnected){
@@ -63,6 +65,7 @@ export const AppProvider = ({ children }) => {
         }
     };
 
+    /**@notice This function allows extracting the current value of the Vault Token that the user has within the contract */
     const getVaultUserBalance = async (_walletAddress) => {
 
         try {
@@ -83,6 +86,7 @@ export const AppProvider = ({ children }) => {
         }
     }
 
+    /**@notice This function allows you to deposit into the Beefy Finance Vault using MATIC */
     const depositWithMatic = async () => {
 
         try {
@@ -99,6 +103,7 @@ export const AppProvider = ({ children }) => {
         }
     }
 
+    /**@notice This function allows to approve a quantity of WMATIC from the user to the Zapper contract */
     const approveWmatic = async () => {
 
         try {
@@ -117,6 +122,7 @@ export const AppProvider = ({ children }) => {
         }
     }
 
+    /**@notice This function allows you to deposit into the Beefy Finance Vault using WMATIC */
     const depositWithWmatic = async () => {
 
         try {
@@ -135,6 +141,10 @@ export const AppProvider = ({ children }) => {
         }
     }
 
+    /**
+     * @notice This function allows you to withdraw the entire balance of Vault Token from the contract and receive the
+     * money in WMATIC
+     */
     const WithdrawBalance = async () => {
 
         try {
@@ -154,7 +164,7 @@ export const AppProvider = ({ children }) => {
         }
     }
 
-// Return component
+//Return component
   return (
     <AppContext.Provider
       value={{
