@@ -4,6 +4,8 @@ import WalletConnected from "./WalletConnected";
 import WithoutWallet from "./WithoutWallet";
 import { useApp } from "../../contexts/AppContext";
 
+/**@info Component in charge of rendering the card component depending on whether the user's wallet is connected or not */
+
 function OptionPanel() {
 
     const { isConnected } = useApp();

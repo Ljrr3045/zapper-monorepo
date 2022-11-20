@@ -2,6 +2,8 @@ import "./AmountField.css";
 import React from 'react';
 import { useApp } from "../../../contexts/AppContext";
 
+/**@info Component in charge of reading and managing the deposit amounts to be used by the user */
+
 function AmountField() {
 
     const { setDepositAmount } = useApp();

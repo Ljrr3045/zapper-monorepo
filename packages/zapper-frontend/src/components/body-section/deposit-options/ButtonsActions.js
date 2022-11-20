@@ -2,6 +2,8 @@ import "./ButtonsActions.css";
 import React from 'react';
 import { useApp } from "../../../contexts/AppContext";
 
+/**@info Component in charge of rendering the buttons with which the user will make the deposit actions */
+
 function ButtonsActions() {
 
     const {

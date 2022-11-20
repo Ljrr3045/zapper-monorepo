@@ -2,6 +2,8 @@ import "./WithdrawButton.css";
 import React from 'react';
 import { useApp } from "../../../contexts/AppContext";
 
+/**@info Component in charge of rendering an information message for the user to connect their wallet */
+
 function WithdrawButton() {
 
     const { WithdrawBalance, amountToWithdraw } = useApp();

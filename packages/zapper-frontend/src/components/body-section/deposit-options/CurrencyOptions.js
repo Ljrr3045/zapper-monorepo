@@ -2,6 +2,8 @@ import "./CurrencyOptions.css";
 import React from 'react';
 import { useApp } from "../../../contexts/AppContext";
 
+/**@info Component in charge of managing which tokens the user will use to deposit */
+
 function CurrencyOptions() {
 
     const { currency, setCurrency } = useApp();

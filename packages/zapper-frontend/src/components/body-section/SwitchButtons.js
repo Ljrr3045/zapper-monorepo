@@ -2,6 +2,8 @@ import "./SwitchButtons.css";
 import React from 'react';
 import { useApp } from "../../contexts/AppContext";
 
+/**@info Component in charge of managing user actions (deposit or withdrawal) */
+
 function SwitchButtons() {
 
     const { userAction, setUserAction } = useApp();

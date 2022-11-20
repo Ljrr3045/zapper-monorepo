@@ -2,6 +2,8 @@ import "./WithoutWallet.css"
 import React from 'react';
 import Card from 'react-bootstrap/Card';
 
+/**@info Component in charge of rendering an information message for the user to connect their wallet */
+
 function WithoutWallet() {
 
     return (

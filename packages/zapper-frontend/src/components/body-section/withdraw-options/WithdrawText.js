@@ -2,6 +2,8 @@ import "./WithdrawText.css";
 import React from 'react';
 import { useApp } from "../../../contexts/AppContext";
 
+/**@info Component in charge of rendering the user's current withdrawal balance */
+
 function WithdrawText() {
 
     const { amountToWithdraw } = useApp();
